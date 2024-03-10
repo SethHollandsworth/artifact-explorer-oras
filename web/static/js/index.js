@@ -5,19 +5,22 @@ const inputsParent = document.querySelector(".inputs");
 const artifact = document.querySelector("#content_area");
 const rows = document.querySelectorAll("#table_digest");
 const tagListDropdown = document.querySelector(".inputs .dropdown > div");
+const sidebarItems = document.querySelectorAll(
+  "#content_area .main .leftSideBar ul li"
+);
 
 let currentActiveInput = reg;
 
 async function displayArtifactContents() {
   try {
-    document
-      .getElementById("content_area")
-      .scrollIntoView({ behavior: "smooth" });
+    // document
+    //   .getElementById("content_area")
+    //   .scrollIntoView({ behavior: "smooth" });
 
     // rsb.isManifestPrepared = false;
     rsb.isReferrersPrepared = false;
-    rsb.prepareManifestBlock();
     rsb.prepareReferrersBlock();
+    rsb.prepareManifestBlock();
   } catch (error) {
     console.error(error);
   }
@@ -377,19 +380,28 @@ document.addEventListener("click", (event) => {
 // ends
 
 // Sidebar Javascript
-const sidebarItems = document.querySelectorAll(
-  "#content_area .main .leftSideBar ul li"
-);
-const blobSidebarItem = document.querySelector("#blobSidebarItem");
-const manifestSidebarItem = document.querySelector("#manifestSidebarItem");
-const layersSidebarItem = document.querySelector("#layersSidebarItem");
-
 sidebarItems.forEach((item) => {
   item.addEventListener("click", () => {
     sidebarItems.forEach((item) => item.classList.remove("active"));
     item.classList.add("active");
   });
 });
+
+const SVGIcons = (currentType) => {
+  if (currentType.includes("vulnerability-scan")) {
+    return "./static/images/supply-chain-icons/oci_icon_securityscanning.svg";
+  } else if (currentType.includes("helm")) {
+    return "./static/images/supply-chain-icons/oci_icon_helm.svg";
+  } else if (currentType.includes("signature")) {
+    return "./static/images/supply-chain-icons/oci_icon_signature.svg";
+  } else if (currentType.includes("sbom")) {
+    return "./static/images/supply-chain-icons/oci_icon_sbom.svg";
+  } else if (currentType.includes("docker")) {
+    return "./static/images/supply-chain-icons/oci_icon_docker.svg";
+  } else {
+    return "./static/images/supply-chain-icons/oci_icon_container.svg";
+  }
+};
 
 // referrer Tree
 const lightArr = ["lightgreen", "lightblue", "lightorange"];
@@ -398,6 +410,9 @@ function generateTree(treeData, ct) {
   let html = "";
   treeData.forEach((node, ind) => {
     const children = generateTree(node.nodes, ct + 1);
+    const currentType = node.ref.artifactType
+      ? node.ref.artifactType
+      : node.ref.mediaType;
     html += `
     <li>
     <details open ${ct === 0 ? "class='pl-0'" : ""}>
@@ -406,24 +421,21 @@ function generateTree(treeData, ct) {
       <div>
           <div class="text">
           ${
-            children === "" ? 
-            ` 
+            children === ""
+              ? ` 
               <img src="./static/images/ellipse.svg" class="no-nodes"/>
-            ` : ""
+            `
+              : ""
           }
           <div class="icon">
-        <img src="./static/images/githubColor.svg">
+        <img src=${SVGIcons(currentType)}/>
       </div>
-          <p>${
-            node.ref.artifactType
-              ? node.ref.artifactType
-              : node.ref.mediaType
-          }</p>
+          <p>${currentType}</p>
         </div>
         <p class="digest">
           <a href="/artifact?image=${reg.value}/${repo.value}@${
-  node.ref.digest
-}">${node.ref.digest}</a></p>
+      node.ref.digest
+    }">${node.ref.digest}</a></p>
         </div>
       </div>
       </summary> 
@@ -499,7 +511,7 @@ function downloadLayer(digest) {
       return response.blob().then((blob) => {
         const downloadLink = document.createElement("a");
         downloadLink.href = URL.createObjectURL(blob);
-        console.log(fileName)
+        console.log(fileName);
         downloadLink.download = fileName;
 
         document.body.appendChild(downloadLink);
@@ -530,8 +542,8 @@ function openDownloadModal(data) {
 
   let { type, digest, title } = data;
 
-  if(!title && type !== "manifest") {
-    title = digest.replace(':', '-');
+  if (!title && type !== "manifest") {
+    title = digest.replace(":", "-");
   }
 
   dwnModalBody.innerHTML = `
@@ -580,9 +592,14 @@ function addHyperlinks() {
 
   const updatedHtmlContent = htmlContent.replace(regex, (match) => {
     const mediaTypeSpan = getFollowingMediaType(textNodes, match);
-    const mediaType = mediaTypeSpan
-      ? mediaTypeSpan.textContent.trim().replace(/"/g, "")
-      : "";
+    let mediaType = "";
+    if (mediaTypeSpan === "manifest") {
+      mediaType = mediaTypeSpan;
+    } else {
+      mediaType = mediaTypeSpan
+        ? mediaTypeSpan.textContent.trim().replace(/"/g, "")
+        : "";
+    }
 
     const redirectURL = `/redirect?mediatype=${encodeURIComponent(
       mediaType
@@ -595,12 +612,16 @@ function addHyperlinks() {
 }
 
 function getFollowingMediaType(nodes, textToFind) {
-  let shouldFindMediaType = false;
   for (let i = 0; i < nodes.length; i++) {
     if (nodes[i].textContent === textToFind) {
-      shouldFindMediaType = true;
-    } else if (shouldFindMediaType && nodes[i].className === "json-string") {
-      return nodes[i];
+      if (
+        nodes[i - 7].innerHTML !== "mediaType" &&
+        nodes[i + 3].innerHTML !== "mediaType"
+      )
+        return "manifest";
+      return nodes[i - 5].className === "json-string"
+        ? nodes[i - 5]
+        : nodes[i + 5];
     }
   }
   return null;
@@ -678,7 +699,9 @@ function generateTable(tableData) {
             <div id="digest">
               <a href="${
                 tableData.isBlob ? "/blob?layer=" : "/artifact?image="
-              }${reg.value}/${repo.value}@${item.digest}" target="_blank">
+              }${reg.value}/${repo.value}@${item.digest}" ${
+        tableData.isBlob ? "target='_blank'" : ""
+      }>
                 ${item.digest}
               </a>
             </div>
@@ -801,10 +824,27 @@ function generateTable(tableData) {
   return table;
 }
 
+const metaDataFields = [
+  { key: "Artifact", index: 0 },
+  { key: "Digest", index: 1 },
+  { key: "MediaType", index: 2 },
+  { key: "Size", index: 3 },
+];
+
 class RightSideBlock {
   contructor() {
     this.isManifestPrepared = false;
     this.isReferrersPrepared = false;
+  }
+
+  resetMetaData() {
+    let inp = document.querySelectorAll(
+      "#content_area .metaData1 .text .textContent p"
+    );
+
+    metaDataFields.forEach((field) => {
+      inp[field.index].textContent = "";
+    });
   }
 
   prepareMetaData() {
@@ -814,14 +854,8 @@ class RightSideBlock {
     let copyIcons = document.querySelectorAll(
       "#content_area .metaData1 #copyIcon"
     );
-    const fields = [
-      { key: "Artifact", index: 0 },
-      { key: "Digest", index: 1 },
-      { key: "MediaType", index: 2 },
-      { key: "Size", index: 3 },
-    ];
 
-    fields.forEach((field) => {
+    metaDataFields.forEach((field) => {
       const value = ar[field.key] || "not available";
       inp[field.index].textContent = value;
       copyIcons[field.index].setAttribute("data-value", value);
@@ -926,9 +960,7 @@ class RightSideBlock {
   async prepareReferrersBlock() {
     if (this.isReferrersPrepared) return;
 
-    const loader = document.querySelector(
-      "#contents .sidebar .loadingBlock"
-    );
+    const loader = document.querySelector("#contents .sidebar .loadingBlock");
     const treeView = document.getElementById("referrerBlock");
     treeView.innerHTML = "";
 
@@ -962,6 +994,9 @@ class RightSideBlock {
         ${treeV}
       </div>
       `;
+
+      loader.classList.add("spinner");
+      loader.classList.remove("loader");
       var treeNodes = document.getElementsByClassName("tree-node");
 
       Array.from(treeNodes).forEach(function (node) {

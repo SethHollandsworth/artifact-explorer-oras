@@ -6,6 +6,7 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 
 	"github.com/gofiber/fiber/v2"
@@ -75,7 +76,7 @@ func Referrers() fiber.Handler {
 			return c.Status(errResponse.StatusCode).JSON(errResponse)
 		}
 
-		referrers, err := GenerateReferrerTreeConcurrent(repo, a.Name, artifact)
+		referrers, errs := GenerateReferrerTreeConcurrent(repo, a.Name, artifact)
 
 		if err != nil {
 			errResponse := Err("Failed to fetch referrers", fiber.StatusNotFound)
@@ -114,6 +115,12 @@ func Referrers() fiber.Handler {
 			referrers = []Referrer{dt}
 			name := a.Registry + a.Repository
 			a.Name = name + ATSYMBOL + string(data.Subject.Digest)
+		}
+		if len(errs) > 0 {
+			// Handle errors, log them or return an error response
+			for _, err := range errs {
+				fmt.Println("Error:", err.Error())
+			}
 		}
 		return c.JSON(referrers)
 	}

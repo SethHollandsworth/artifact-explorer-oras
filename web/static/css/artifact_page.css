@@ -73,15 +73,19 @@
 }
 #contents {
   display: flex;
+  width: 100%;
   max-width: 1800px;
   margin: auto;
   gap: 3rem;
-  justify-content: center;
 }
 #contents .sidebar {
-  width: 550px;
+  /* height: 100vh; */
+  min-width: 500px;
+  width: 35%;
+  margin-top: 1rem;
   position: relative;
   border-right: 3px solid rgba(0, 0, 0, 0.22);
+  /* overflow: scroll; */
 }
 #contents .sidebar .spinner {
   display: none;
@@ -101,11 +105,13 @@
 /* content area */
 #content_area {
   flex-direction: column;
-  width: 80%;
+  width: 1000px;
   max-width: 1500px;
   margin: auto;
   gap: 1rem;
   margin: 4rem auto;
+  margin-top: 1rem;
+  overflow: auto;
 }
 #content_area table #table_digest {
   color: var(--primary-color-light);
@@ -121,6 +127,7 @@
 
 #content_area .main {
   margin-top: 2rem;
+  margin-right: 1rem;
 }
 #content_area
   .ui.labeled.input:not([class*="corner labeled"])
@@ -232,6 +239,11 @@ tr,
 th {
   word-break: break-all;
 }
+.sidebar #referrerBlock {
+  padding-left: 10px;
+  position: sticky;
+  top: 0;
+}
 #referrerBlock .info,
 #referrerBlock .error,
 #manifestBlock .error,
@@ -249,22 +261,18 @@ th {
 #manifestBlock .error img {
   width: 40px;
 }
-#manifestTable,
-#referrers {
-  overflow: hidden;
-}
 #manifestTable .view-item,
 #referrers .view-item {
   display: none;
   margin-top: 1rem;
   opacity: 0;
   transition: all 0.3s ease;
-  max-height: 50rem;
+  max-height: 100rem;
   overflow: auto;
 }
 #manifestTable #jsonV,
 #referrers #jsonV {
-  max-height: 70vh;
+  /* max-height: 70vh; */
   overflow: auto;
   width: 100%;
 }
@@ -329,7 +337,7 @@ th {
 
 #treeV li summary .summary-content {
   display: inline-block;
-  padding: 5px 10px;
+  padding: 5px 15px;
   width: 90%;
 }
 
@@ -391,25 +399,29 @@ th {
   line-height: 1.2em;
 }
 
+#treeV .no-marker .summary-content .digest {
+  margin-left: 25px;
+}
+
 /* Add vertical lines */
-/* #treeV li::before {
+#treeV li::before {
   content: "";
   position: absolute;
   top: 0;
   left: -2px;
-  border-left: 2px solid var(--secondary-color-light);
-  height: 100%;
-} */
+  border-left: 2px solid var(--secondary-color-dark);
+  height: 50%;
+}
 
 /* Add horizontal lines for child elements */
-/* #treeV li::after {
+#treeV li::after {
   content: "";
   position: absolute;
   top: 50%;
   left: -2px;
-  border-top: 2px solid var(--secondary-color-light);
+  border-top: 2px solid var(--secondary-color-dark);
   width: 10px;
-} */
+}
 
 #treeV li details > ul {
   margin-left: 10px;
@@ -419,7 +431,7 @@ th {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  width: 70%;
+  width: 80%;
   max-width: 1100px;
   background: #fff;
   padding: 15px;
@@ -544,6 +556,7 @@ th {
   border: 1px solid var(--secondary-color-light);
   border-radius: 10px;
   box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.25);
+  z-index: 1;
 }
 
 .dropdown > div {

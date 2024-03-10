@@ -1,20 +1,18 @@
 # ORAS Artifact Explorer
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Build Status](https://travis-ci.org/VasuDevrani/artifact-explorer-oras.svg?branch=main)](https://travis-ci.org/VasuDevrani/artifact-explorer-oras)
-[![Docker Pulls](https://img.shields.io/docker/pulls/vasudevrani/oras-artifact-explorer.svg)](https://hub.docker.com/repository/docker/vasudevrani/oras-artifact-explorer)
-[![Go Report Card](https://goreportcard.com/badge/github.com/VasuDevrani/artifact-explorer-oras)](https://goreportcard.com/report/github.com/VasuDevrani/artifact-explorer-oras)
-
 ## Table of Contents
 
-- [About the Project](#about-the-project)
-  - [Features](#features)
-  - [Target Users](#target-users)
-  - [Benefits](#benefits)
-- [Steps to Run](#steps-to-run)
-- [Docker Image](#docker-image)
-- [Code of Conduct](#code-of-conduct)
-- [Contributions](#contributions)
+- [ORAS Artifact Explorer](#oras-artifact-explorer)
+  - [Table of Contents](#table-of-contents)
+  - [About the Project](#about-the-project)
+    - [Features](#features)
+    - [Target Users](#target-users)
+    - [Benefits](#benefits)
+  - [Getting Started](#getting-started)
+  - [Steps to Run](#steps-to-run)
+  - [Docker Image](#docker-image)
+    - [Code of Conduct](#code-of-conduct)
+    - [Contributions](#contributions)
 
 ## About the Project
 
@@ -78,8 +76,6 @@ For the ORAS Community:
 ## Docker Image
 
 Find the Docker image at:
-
-[vasudevrani/oras-artifact-explorer](https://hub.docker.com/repository/docker/vasudevrani/oras-artifact-explorer/general)
 
 ### Code of Conduct
 
